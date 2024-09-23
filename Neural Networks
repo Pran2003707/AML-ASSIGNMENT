@@ -1,0 +1,220 @@
+
+#### Assignment 1
+#### Name: Pranitha Kasireddy
+#### Student Id : 811319207 
+#### Advance Machine Learning
+from tensorflow.keras.datasets import imdb
+(train_data, train_labels), (test_data, test_labels) = imdb.load_data(
+    num_words=10000)
+train_labels[0]
+max([max(sequence) for sequence in train_data])
+word_index = imdb.get_word_index()
+reverse_word_index = dict(
+    [(value, key) for (key, value) in word_index.items()])
+decoded_review = " ".join(
+    [reverse_word_index.get(i - 3, "?") for i in train_data[0]])
+import numpy as np
+def vectorize_sequences(sequences, dimension=10000):
+    results = np.zeros((len(sequences), dimension))
+    for i, sequence in enumerate(sequences):
+        for j in sequence:
+            results[i, j] = 1.
+    return results
+x_train = vectorize_sequences(train_data)
+x_test = vectorize_sequences(test_data)
+x_train[0]
+y_train = np.asarray(train_labels).astype("float32")
+y_test = np.asarray(test_labels).astype("float32")
+from tensorflow import keras
+from tensorflow.keras import layers
+
+model = keras.Sequential([
+    layers.Dense(32, activation="tanh"),
+    layers.Dense(32, activation="tanh"),
+    layers.Dense(32, activation="tanh"),
+    layers.Dense(1, activation="sigmoid")
+])
+model.compile(optimizer="adam", 
+              loss="mean_squared_error",
+              metrics=["accuracy"])
+### Validating your approach Setting aside a validation set
+x_val = x_train[:10000]
+partial_x_train = x_train[10000:]
+y_val = y_train[:10000]
+partial_y_train = y_train[10000:]
+## model planned to train with 20 epoch with batch size of 256
+
+history = model.fit(partial_x_train,
+                    partial_y_train,
+                    epochs=20,
+                    batch_size=256,
+                    validation_data=(x_val, y_val))
+history_dict = history.history
+history_dict.keys()
+### Plotting the train & Validation loss
+import matplotlib.pyplot as plt
+history_dict = history.history
+loss_values = history_dict["loss"]
+val_loss_values = history_dict["val_loss"]
+epochs = range(1, len(loss_values) + 1)
+plt.plot(epochs, loss_values, "bo", label="Training loss")
+plt.plot(epochs, val_loss_values, "b", label="Validation loss")
+plt.title("Training and validation loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.show()
+**Plotting the training and validation accuracy**
+plt.clf()
+acc = history_dict["accuracy"]
+val_acc = history_dict["val_accuracy"]
+plt.plot(epochs, acc, "bo", label="Training acc")
+plt.plot(epochs, val_acc, "b", label="Validation acc")
+plt.title("Training and validation accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
+results = model.evaluate(x_test, y_test)
+results
+#### Combining all code together along with dropout layer
+## The libraries needed to configure an environment
+
+#####################################
+from tensorflow import keras
+from tensorflow.keras import layers
+from keras.layers import Dense
+from keras.layers import Dropout
+from tensorflow.keras import regularizers
+#####################################
+
+# Three-layered neural network implementation with a single dropout layer
+#######################################
+model = keras.Sequential()
+model.add(Dense(32,activation='tanh')) 
+model.add(Dropout(0.5))
+#kernel_regularizer=regularizers.L1(0.01), activity_regularizer=regularizers.L2(0.01))
+model.add(Dense(32,activation='tanh',kernel_regularizer=regularizers.L1(0.01), activity_regularizer=regularizers.L2(0.01)))
+model.add(Dropout(0.5))
+model.add(Dense(32,activation='tanh'))
+model.add(Dense(1, activation='sigmoid'))
+########################################
+
+# Here, we employed accuracy measurements, mean squared error loss, and the optimizer "adagrad" for compilation.
+########################################
+model.compile(optimizer="adam",
+              loss="mean_squared_error",
+              metrics=["accuracy"])
+########################################
+
+## dividing the data
+#######################################
+x_val = x_train[:10000]
+partial_x_train = x_train[10000:]
+y_val = y_train[:10000]
+partial_y_train = y_train[10000:]
+#######################################
+
+# Train a neural network
+#####################################################
+history = model.fit(partial_x_train,
+                    partial_y_train,
+                    epochs=20,
+                    batch_size=256,
+                    validation_data=(x_val, y_val))
+#####################################################
+
+# Plotting Accuracy of Training and Validation
+####################################################
+plt.clf()
+acc = history_dict["accuracy"]
+val_acc = history_dict["val_accuracy"]
+plt.plot(epochs, acc, "bo", label="Training acc")
+plt.plot(epochs, val_acc, "b", label="Validation acc")
+plt.title("Training and validation accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
+####################################################
+
+
+# Evaluating the results
+results = model.evaluate(x_test, y_test)
+results
+
+#### Summary about the three-layered neural network for IMDB data:
+•	In order to get our neural network operating properly, we first acquired the necessary libraries. From my studies and limited investigation, I've concluded that, in comparison to other deep learning libraries like Pytorch, TensorFlow offers good implementation and support.
+
+The Imports List is: 
+
+
+
+from keras import tensorflow  
+
+from import layers of tensorflow.keras
+
+import from keras.layers Compact
+
+import from keras.layers Dismissal
+
+
+
+•	we imported keras, keras.layers, Dense and Dropouts. Each of its own has significant importance in its implementation. Keras is the high-level API of TensorFlow 2: an approachable, highly productive interface for solving machine learning problems, with a focus on modern deep learning.
+	The core data structures of Keras are layers and models. The simplest type of model is the Sequential model, a linear stack of layers.
+	Dense represent the number of hidden units in the neural network.
+	Dropout: The significance of dropout is taking a bunch of inputs or hidden layer input, random remove the connections.
+   Now let’s talk about the designing the neural network layers.
+model = keras.Sequential()  ----- Sequential model is the simplest mode of keras, which is stack up the layers in the sequences.
+model.add(Dense(32,activation='tanh'))
+Stacking layers is easy using the. add function. Also 32 represents the number of hidden units and we use the activation function tanh.
+Before going to the next topic, I will describe the contents of a neural network.
+1.	Input layer -- where we provide our input to it. – here we provide vector representation of IMDB data
+2.	Hidden layers – it contains the number of dense units, and we can stack up as many layers as we want depending on the requirement.
+3.	Output layer – output layer, Preferably the output layer has 1 dense unit.
+Here in this task I tried to implement three layered approach as per the requirement given in the assignment.
+   model = keras.Sequential([
+    layers.Dense(32, activation="tanh"),
+    layers.Dense(32, activation="tanh"),
+    layers.Dense(32, activation="tanh"),
+    layers.Dense(1, activation="sigmoid")
+])
+
+The above code model initialized as sequential. And we stack up three layers with 32 dense units and tanh activation function. In the task, I implemented tanh instead of relu as suggested in the assignment.
+model.compile(optimizer="adagrad", loss="mean_squared_error", metrics=["accuracy"])
+The above piece of code uses an optimizer adagrad with mse loss. I still have a doubt here initially IMBD data uses a loss of binary_crossentrophy which is a probabilistic loss and what if we changed the regression loss. More information will be available in 2nd reference link.
+Optimizers are very important to minimize the error and we have different techniques/optimizers. For example, adam is considered as good optimizers among the different approaches. In this task, I used adagrad. More details about optimizers will be explained in the 3nd reference link.
+	We split the data into training and validation part and the code below shows the split
+
+x_val = x_train[:10000]
+partial_x_train = x_train[10000:]
+y_val = y_train[:10000]
+partial_y_train = y_train[10000:]
+Training the data 
+history = model.fit(partial_x_train,
+                    partial_y_train,
+                    epochs=20,
+                    batch_size=256,
+                    validation_data=(x_val, y_val))
+The above line of code represent it will train the neural network with 20 epoch and batch size of 256 and parallely it compare with validation data.
+I used L1 and L2 regularizers but it does not gives much impact on the total validation accuracy.
+
+
+   
+
+        
+Reference: 
+1.	https://keras.io/about
+2.	https://keras.io/api/losses/
+3.	https://keras.io/api/optimizers/
+
+## Conclusions
+
+##### 1. neural network designed with  3 layers
+##### 2. Activation functions tanh is used instead of relu
+##### 3. Optimizer adam is used instead of rmsprop
+##### 4. L1 & L2 regularizers are used
+##### 4. Dropout layer with 0.5 is used. That means we are dropping 50 percent of inputs during the training.
+
+### Final accuracy of 99.39 and validation accuracy of 87.2 is achieved using the above changes..
+
